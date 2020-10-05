@@ -1,0 +1,9 @@
+{
+  "course": [
+    {
+      "id": 1,
+      "name": "javascipt",
+      "description": "Basic learning"
+    }
+  ]
+}
