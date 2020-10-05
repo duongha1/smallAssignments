@@ -78,3 +78,4 @@ function HandleDeleteCourse(id) {
       courseItem.remove();
     });
 }
+//Update
