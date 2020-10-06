@@ -1,6 +1,11 @@
 const listCoursesBlock = document.querySelector("#courses");
 const courseAPI = "http://localhost:3000/course";
 
+//Definition
+const createBtn = document.getElementById("btn-create");
+const updateBtn = document.getElementById("btn-update");
+
+//start to render course
 function start() {
   getCourse((courses) => renderCourse(courses));
 }
@@ -20,13 +25,14 @@ function renderCourse(courses) {
             <h2>${course.name}</h2>
             <p>${course.description}</p>
             <button onclick="HandleDeleteCourse(${course.id})">&times;</button>
+            <button onclick="renderInput(${course.id})">Edit</button>
         </li>
         `;
   });
   listCoursesBlock.innerHTML = html.join("");
 }
 
-//Handle create
+//-----------------------------Handle create-----------------------------
 //data is data input from UI
 //callback return data POSTED to database
 function createCourse(data, callback) {
@@ -44,15 +50,14 @@ function createCourse(data, callback) {
     .then(callback);
 }
 function createForm() {
-  const createBtn = document.getElementById("btn");
   createBtn.onclick = () => {
-    const name = document.querySelector('input[name="name"]').value;
-    const description = document.querySelector('input[name="description"]')
+    const newName = document.querySelector('input[name="name"]').value;
+    const newDescription = document.querySelector('input[name="description"]')
       .value;
-    console.log(name, description);
+    console.log(newName, newDescription);
     const formData = {
-      name: name,
-      description: description,
+      name: newName,
+      description: newDescription,
     };
 
     //after create new data, we need to get data to render again
@@ -61,7 +66,7 @@ function createForm() {
 }
 createForm();
 
-//Delete
+//-----------------------------Delete-----------------------------
 function HandleDeleteCourse(id) {
   //reference on mozilla to use fetch with POST method
   const option = {
@@ -78,4 +83,51 @@ function HandleDeleteCourse(id) {
       courseItem.remove();
     });
 }
-//Update
+
+//-----------------------------Update-----------------------------
+//execute PUT method on database and fetch API to render UI
+function HandleUpdateCourse(id, data, callback) {
+  const option = {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      // 'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: JSON.stringify(data),
+  };
+  fetch(courseAPI + "/" + id, option)
+    .then((res) => res.json)
+    .then(callback);
+}
+//get data from UI
+function setNewCourse(id) {
+  updateBtn.onclick = () => {
+    const newName = document.querySelector('input[name="name"]').value;
+    const newDescription = document.querySelector('input[name="description"]')
+      .value;
+    const formData = {
+      name: newName,
+      description: newDescription,
+    };
+    console.log(formData);
+    HandleUpdateCourse(id, formData, () =>
+      getCourse((courses) => renderCourse(courses))
+    );
+  };
+}
+function renderInput(id) {
+  const courseItem = document.querySelector(".course-item-" + id);
+  createBtn.style.display = "none";
+  updateBtn.style.display = "block";
+
+  //set value into input
+  const title = courseItem.children[0].textContent;
+  const content = courseItem.children[1].textContent;
+  const currentName = document.querySelector('input[name="name"]');
+  const currentDescription = document.querySelector(
+    'input[name="description"]'
+  );
+  currentName.value = title;
+  currentDescription.value = content;
+  setNewCourse(id);
+}
